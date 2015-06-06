@@ -1,6 +1,7 @@
 package com.frankegan.awesomelist;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,24 +15,25 @@ import java.util.ArrayList;
  * @author frankegan created on 6/2/15.
  */
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder>{
-    ArrayList<ImgurData> myDataset = new ArrayList<>();
+    static ArrayList<ImgurData> myDataset = new ArrayList<>();
+    static OnDisplayListener mListener;
 
-    public MyAdapter() {
+    public interface OnDisplayListener {
+        void onDisplay(String link);
     }
 
-    public MyAdapter(ArrayList<ImgurData> myDataset) {
-        this.myDataset = myDataset;
-    }
-
-    // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         public TextView title;
         public NetworkImageView networkImageView;
+
         public ViewHolder(View root) {
             super(root);
+            root.setOnClickListener((View v) -> {
+                getDisplayListener().onDisplay("http://i.imgur.com/"
+                        + myDataset.get(getPosition()).getId() +".png");
+                Log.i("frankegan", "element clicked");
+            });
             title = (TextView) root.findViewById(R.id.title_text);
             networkImageView = (NetworkImageView) root.findViewById(R.id.net_img);
         }
@@ -48,7 +50,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder>{
         }
     }
 
-    // Create new views (invoked by the layout manager)
     @Override
     public MyAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // create a new view
@@ -72,6 +73,15 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder>{
     }
 
     public void setDataset(ArrayList<ImgurData> dataset){
+
         myDataset.addAll(dataset);
+    }
+
+    public static void setOnDisplayListener(OnDisplayListener listener){
+        mListener = listener;
+    }
+
+    public static OnDisplayListener getDisplayListener(){
+        return mListener;
     }
 }

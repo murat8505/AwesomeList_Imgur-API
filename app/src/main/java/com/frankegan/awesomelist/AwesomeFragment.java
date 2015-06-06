@@ -52,6 +52,7 @@ public class AwesomeFragment extends Fragment {
 
         if(mAdapter == null)
             mAdapter = new MyAdapter();
+        mAdapter.setOnDisplayListener((MyAdapter.OnDisplayListener) container.getContext());
         if(shouldUpdate())
                 loadPage(page);//TODO this is probably right
         mRecyclerView.setAdapter(mAdapter);

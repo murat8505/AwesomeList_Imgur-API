@@ -15,13 +15,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/background_light"
-        android:alpha="70">
+        android:layout_alignBottom="@id/net_img"
+        android:alpha="50">
         <TextView
             android:id="@+id/title_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:maxHeight="20dp"
-            android:gravity="center"/>
+            android:gravity="center"
+            android:alpha="50"/>
     </LinearLayout>
 
 </RelativeLayout>

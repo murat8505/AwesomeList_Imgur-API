@@ -1,6 +1,7 @@
 package com.frankegan.awesomelist;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -19,20 +20,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 
-public class MainActivity extends Activity implements OnDisplayListener{
+public class MainActivity extends Activity implements MyAdapter.OnDisplayListener, ImageDisplayFragment.OnDismissListener{
     AwesomeFragment awesomeFragment;
-    String tag = "imgur_list_fragment";
+    String awesomeTag = "imgur_list_fragment";
+    String displayTag = "display_fragment";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        awesomeFragment = (AwesomeFragment) getFragmentManager().findFragmentByTag(tag);
+        awesomeFragment = (AwesomeFragment) getFragmentManager().findFragmentByTag(awesomeTag);
         if (awesomeFragment == null) {
             Log.i("frankegan", "Adding awesomeFragment");
             awesomeFragment = AwesomeFragment.getInstance();
             awesomeFragment.setRetainInstance(true);
-            getFragmentManager().beginTransaction().replace(R.id.fragment_frame, awesomeFragment, tag).commit();
+            getFragmentManager().beginTransaction().replace(R.id.fragment_frame, awesomeFragment, awesomeTag).commit();
         }
     }
 
@@ -60,6 +62,20 @@ public class MainActivity extends Activity implements OnDisplayListener{
 
     @Override
     public void onDisplay(String link) {
+        getFragmentManager().beginTransaction().add(R.id.fragment_frame, ImageDisplayFragment.getInstance(link), displayTag).commit();
+        Log.i("frankegan", "created fragment with link = " + link);
+    }
 
+    @Override
+    public void onDismiss() {
+        Fragment fragment = getFragmentManager().findFragmentByTag(displayTag);
+        if(fragment != null)
+            getFragmentManager().beginTransaction().remove(fragment).commit();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(getFragmentManager().findFragmentByTag(displayTag) != null)
+            onDismiss();
     }
 }
