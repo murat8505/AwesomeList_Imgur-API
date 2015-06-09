@@ -1,34 +1,34 @@
 package com.frankegan.awesomelist;
 
-import android.app.Activity;
 import android.app.Fragment;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.HashMap;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
+import android.widget.FrameLayout;
 
 
-public class MainActivity extends Activity implements MyAdapter.OnDisplayListener, ImageDisplayFragment.OnDismissListener{
+public class MainActivity extends AppCompatActivity implements MyAdapter.OnDisplayListener,
+        ImageDisplayFragment.OnDismissListener, OnAppBarChangeListener {
     AwesomeFragment awesomeFragment;
     String awesomeTag = "imgur_list_fragment";
     String displayTag = "display_fragment";
+    Toolbar toolbar;
+    FrameLayout frame;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        toolbar = (Toolbar)findViewById(R.id.toolbar);
+        frame = (FrameLayout)findViewById(R.id.fragment_frame);
+        setSupportActionBar(toolbar);
         awesomeFragment = (AwesomeFragment) getFragmentManager().findFragmentByTag(awesomeTag);
         if (awesomeFragment == null) {
             Log.i("frankegan", "Adding awesomeFragment");
@@ -77,5 +77,37 @@ public class MainActivity extends Activity implements MyAdapter.OnDisplayListene
     public void onBackPressed() {
         if(getFragmentManager().findFragmentByTag(displayTag) != null)
             onDismiss();
+        else finish();
+    }
+
+    @Override
+    public void onVisibilityChanged(int visibility) {
+        switch (visibility){
+            case OnAppBarChangeListener.VISIBLE:
+                getSupportActionBar().show();
+                break;
+            case OnAppBarChangeListener.GONE:
+                getSupportActionBar().hide();
+                break;
+        }
+    }
+
+    @Override
+    public void onAppBarScrollOut() {
+        toolbar.animate().translationY(-(toolbar.getHeight() + getStatusBarHeight())).setInterpolator(new AccelerateInterpolator(2));
+    }
+
+    @Override
+    public void onAppBarScrollIn() {
+        toolbar.animate().translationY(0).setInterpolator(new DecelerateInterpolator(2));
+    }
+
+    public int getStatusBarHeight() {
+        int result = 0;
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
     }
 }

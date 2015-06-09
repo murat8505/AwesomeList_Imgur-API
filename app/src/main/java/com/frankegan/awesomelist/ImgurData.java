@@ -24,6 +24,10 @@ public class ImgurData {
         return description;
     }
 
+    public String getLink(){
+        return "http://i.imgur.com/" + id + ".png";
+    }
+
     public void setId(String id) {
         this.id = id;
     }

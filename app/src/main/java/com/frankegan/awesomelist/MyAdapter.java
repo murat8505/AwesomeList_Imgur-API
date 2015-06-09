@@ -64,7 +64,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder>{
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         holder.setText(myDataset.get(position).getTitle());
-        holder.setImageUrl("http://i.imgur.com/" + myDataset.get(position).getId() + ".png");//TODO add link to imgurdata
+        holder.setImageUrl(myDataset.get(position).getLink());
     }
 
     @Override
@@ -77,7 +77,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder>{
         myDataset.addAll(dataset);
     }
 
-    public static void setOnDisplayListener(OnDisplayListener listener){
+    public void setOnDisplayListener(OnDisplayListener listener){
         mListener = listener;
     }
 

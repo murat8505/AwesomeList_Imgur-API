@@ -7,4 +7,9 @@
         <item name="colorPrimaryDark">@color/app_primary_dark</item>
     </style>
 
+    <style name="autoscroll">
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">marquee</item>
+    </style>
+
 </resources>

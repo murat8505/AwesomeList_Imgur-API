@@ -1,5 +1,6 @@
 package com.frankegan.awesomelist;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -34,10 +35,21 @@ public class AwesomeFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private MyAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    OnAppBarChangeListener appbarListener;
 
     public static AwesomeFragment getInstance() {
         AwesomeFragment awesome = new AwesomeFragment();
         return awesome;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            appbarListener = (MainActivity) activity;
+        }catch (ClassCastException e){
+            Log.e("frankegan", e.toString());
+        }
     }
 
     @Nullable
@@ -45,22 +57,28 @@ public class AwesomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_with_list, container, false);
         mRecyclerView = (RecyclerView) v.findViewById(R.id.my_recycler_view);
-        int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.grid_margin);
-        mRecyclerView.addItemDecoration(new SpacesItemDecoration(spacingInPixels));
         mLayoutManager = new GridLayoutManager(container.getContext(), 2);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         if(mAdapter == null)
             mAdapter = new MyAdapter();
         mAdapter.setOnDisplayListener((MyAdapter.OnDisplayListener) container.getContext());
-        if(shouldUpdate())
-                loadPage(page);//TODO this is probably right
+        loadPage(page);//TODO re-add should load
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setOnScrollListener(new EndlessRecyclerOnScrollListener((LinearLayoutManager) mLayoutManager) {
             @Override
             public void onLoadMore(int current_page) {
                 loadPage(current_page);
-                Log.i("***FRANKEGAN***", "loaded page " + page);
+            }
+
+            @Override
+            public void onShow(){
+                appbarListener.onAppBarScrollIn();
+            }
+
+            @Override
+            public void onHide(){
+                appbarListener.onAppBarScrollOut();
             }
         });
         return v;
@@ -83,7 +101,7 @@ public class AwesomeFragment extends Fragment {
                 e.printStackTrace();
             }
         };
-        setPage(newPage);
+        setPage(newPage);//TODO is this necessary?
         JsonObjectRequest jsonReq = new JsonObjectRequest(Request.Method.GET, URL, null,
                 successResponse, (VolleyError error) -> Log.e("volley", error.toString())) {
             @Override//You must set the request header
@@ -100,9 +118,5 @@ public class AwesomeFragment extends Fragment {
     public void setPage(Integer i) {
         page = i;
         URL = "https://api.imgur.com/3/gallery/r/pic/" + page + ".json";
-    }
-
-    public boolean shouldUpdate() {
-        return true;//ids.size() == 0;
     }
 }

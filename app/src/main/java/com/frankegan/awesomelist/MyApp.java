@@ -23,7 +23,6 @@ public class MyApp extends android.app.Application {
     public void onCreate() {
         super.onCreate();
         mRequestQueue = Volley.newRequestQueue(getApplicationContext());
-        //TODO this is mad sus
         mImageLoader = new ImageLoader(mRequestQueue, new BitmapCache(getContext()));
     }
 
