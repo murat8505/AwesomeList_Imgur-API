@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -11,7 +12,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -28,17 +28,17 @@ import java.util.HashMap;
 /**
  * @author frankegan created on 6/2/15.
  */
-public class AwesomeFragment extends Fragment {
+public class ImgurGridFragment extends Fragment {
 
-    private Integer page = 0;
-    private String URL = "https://api.imgur.com/3/gallery/r/pic/" + page + ".json";
-    private RecyclerView mRecyclerView;
-    private MyAdapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
     OnAppBarChangeListener appbarListener;
+    private RecyclerView mRecyclerView;
+    private ImgurAdapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
+    SwipeRefreshLayout refreshLayout;
+    private String SUBREDDIT = "pic";//default is r/pic cuz it's kind of pretty
 
-    public static AwesomeFragment getInstance() {
-        AwesomeFragment awesome = new AwesomeFragment();
+    public static ImgurGridFragment getInstance() {
+        ImgurGridFragment awesome = new ImgurGridFragment();
         return awesome;
     }
 
@@ -47,7 +47,7 @@ public class AwesomeFragment extends Fragment {
         super.onAttach(activity);
         try {
             appbarListener = (MainActivity) activity;
-        }catch (ClassCastException e){
+        } catch (ClassCastException e) {
             Log.e("frankegan", e.toString());
         }
     }
@@ -60,10 +60,22 @@ public class AwesomeFragment extends Fragment {
         mLayoutManager = new GridLayoutManager(container.getContext(), 2);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        if(mAdapter == null)
-            mAdapter = new MyAdapter();
-        mAdapter.setOnDisplayListener((MyAdapter.OnDisplayListener) container.getContext());
-        loadPage(page);//TODO re-add should load
+        refreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.refresh);
+        refreshLayout.setProgressViewOffset(true, 170, 250);//TODO actually calculate maybe?
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mAdapter = new ImgurAdapter();
+                loadPage(0);
+                mRecyclerView.setAdapter(mAdapter);
+            }
+        });
+
+        if (mAdapter == null)
+            mAdapter = new ImgurAdapter();
+        mAdapter.setOnDisplayListener((ImgurAdapter.OnDisplayListener) container.getContext());
+        if(savedInstanceState == null)
+            loadPage(0);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setOnScrollListener(new EndlessRecyclerOnScrollListener((LinearLayoutManager) mLayoutManager) {
             @Override
@@ -72,16 +84,22 @@ public class AwesomeFragment extends Fragment {
             }
 
             @Override
-            public void onShow(){
+            public void onShow() {
                 appbarListener.onAppBarScrollIn();
             }
 
             @Override
-            public void onHide(){
+            public void onHide() {
                 appbarListener.onAppBarScrollOut();
             }
         });
         return v;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("startAtTop", false);
     }
 
     void loadPage(int newPage) {
@@ -91,8 +109,10 @@ public class AwesomeFragment extends Fragment {
                 JSONArray responseJSONArray = response.getJSONArray("data");
                 for (int i = 0; i < responseJSONArray.length(); i++) {
                     JSONObject responseObj = responseJSONArray.getJSONObject(i);
-                    ImgurData datum = new ImgurData(responseObj.get("id").toString(),
-                            responseObj.get("title").toString(), responseObj.get("description").toString());
+                    ImgurData datum = new ImgurData(
+                            responseObj.get("id").toString(),
+                            responseObj.get("title").toString(),
+                            responseObj.get("description").toString());
                     imgurDataSet.add(datum);
                 }
                 mAdapter.setDataset(imgurDataSet);
@@ -101,8 +121,7 @@ public class AwesomeFragment extends Fragment {
                 e.printStackTrace();
             }
         };
-        setPage(newPage);//TODO is this necessary?
-        JsonObjectRequest jsonReq = new JsonObjectRequest(Request.Method.GET, URL, null,
+        JsonObjectRequest jsonReq = new JsonObjectRequest(Request.Method.GET, getURLForSubredditPage(SUBREDDIT, newPage), null,
                 successResponse, (VolleyError error) -> Log.e("volley", error.toString())) {
             @Override//You must set the request header
             public HashMap<String, String> getHeaders() {
@@ -113,10 +132,14 @@ public class AwesomeFragment extends Fragment {
         };
         MyApp.getVolleyRequestQueue().add(jsonReq);
         imgurDataSet.clear();
+        refreshLayout.setRefreshing(false);
     }
 
-    public void setPage(Integer i) {
-        page = i;
-        URL = "https://api.imgur.com/3/gallery/r/pic/" + page + ".json";
+    public String getURLForSubredditPage(String subreddit, int i) {
+        return "https://api.imgur.com/3/gallery/r/" + subreddit + "/" + i + ".json";
+    }
+
+    public void setSubreddit(String newSub){
+        SUBREDDIT = newSub;
     }
 }

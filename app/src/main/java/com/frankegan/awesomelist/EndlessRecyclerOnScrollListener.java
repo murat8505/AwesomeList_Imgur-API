@@ -34,6 +34,7 @@ public abstract class EndlessRecyclerOnScrollListener extends RecyclerView.OnScr
         totalItemCount = mLinearLayoutManager.getItemCount();
         firstVisibleItem = mLinearLayoutManager.findFirstVisibleItemPosition();
 
+        //for endless scrolling
         if (loading) {
             if (totalItemCount > previousTotal) {
                 loading = false;
@@ -49,6 +50,7 @@ public abstract class EndlessRecyclerOnScrollListener extends RecyclerView.OnScr
 
             loading = true;
         }
+        //for hiding appbar
         if (scrolledDistance > HIDE_THRESHOLD && controlsVisible) {
             onHide();
             controlsVisible = false;

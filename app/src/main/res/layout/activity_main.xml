@@ -11,7 +11,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/app_primary"
+        android:background="@color/material_lightgreen500"
         android:fitsSystemWindows="true"
         android:elevation="4dp"/>
 

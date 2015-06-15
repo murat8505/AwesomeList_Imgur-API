@@ -1,8 +1,6 @@
 package com.frankegan.awesomelist;
 
 import android.app.Fragment;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -14,9 +12,9 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 
 
-public class MainActivity extends AppCompatActivity implements MyAdapter.OnDisplayListener,
+public class MainActivity extends AppCompatActivity implements ImgurAdapter.OnDisplayListener,
         ImageDisplayFragment.OnDismissListener, OnAppBarChangeListener {
-    AwesomeFragment awesomeFragment;
+    ImgurGridFragment imgurGridFragment;
     String awesomeTag = "imgur_list_fragment";
     String displayTag = "display_fragment";
     Toolbar toolbar;
@@ -29,12 +27,12 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.OnDispl
         toolbar = (Toolbar)findViewById(R.id.toolbar);
         frame = (FrameLayout)findViewById(R.id.fragment_frame);
         setSupportActionBar(toolbar);
-        awesomeFragment = (AwesomeFragment) getFragmentManager().findFragmentByTag(awesomeTag);
-        if (awesomeFragment == null) {
+        imgurGridFragment = (ImgurGridFragment) getFragmentManager().findFragmentByTag(awesomeTag);
+        if (imgurGridFragment == null) {
             Log.i("frankegan", "Adding awesomeFragment");
-            awesomeFragment = AwesomeFragment.getInstance();
-            awesomeFragment.setRetainInstance(true);
-            getFragmentManager().beginTransaction().replace(R.id.fragment_frame, awesomeFragment, awesomeTag).commit();
+            imgurGridFragment = ImgurGridFragment.getInstance();
+            imgurGridFragment.setRetainInstance(true);
+            getFragmentManager().beginTransaction().replace(R.id.fragment_frame, imgurGridFragment, awesomeTag).commit();
         }
     }
 
@@ -61,9 +59,8 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.OnDispl
     }
 
     @Override
-    public void onDisplay(String link) {
-        getFragmentManager().beginTransaction().add(R.id.fragment_frame, ImageDisplayFragment.getInstance(link), displayTag).commit();
-        Log.i("frankegan", "created fragment with link = " + link);
+    public void onDisplay(ImgurData data) {
+        getFragmentManager().beginTransaction().add(R.id.fragment_frame, ImageDisplayFragment.getInstance(data), displayTag).commit();
     }
 
     @Override
